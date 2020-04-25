@@ -1,0 +1,68 @@
+---
+title: "HW6"
+author: "Bailey Vande Griend"
+date: "4/16/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(results = TRUE)
+```
+**Question 1**
+
+```{r}
+bgy <- colorRampPalette(c("blue", "green", "yellow"))
+filled.contour(volcano, color.palette = bgy, asp = 1)
+```
+```{r}
+myDat <- iris
+avgSepLength <- aggregate(Sepal.Length ~ Species, data = myDat, mean)
+barplot(Sepal.Length ~ Species, data = avgSepLength, col = grey.colors(3))
+```
+
+```{r}
+plot(myDat$Petal.Length ~ Species, data = myDat, col = cm.colors(3))
+```
+
+**Question 2**
+
+Colors can be misleading when they provide no additional info to the graph. I demonstrated this in the plot above, Each species was given its own color but they don't add anything of value and they can leave viewers confused and wondering what the colors mean
+
+
+**Question 3**
+
+In the graph in question, the scaling feels off. In my opinion, it would be easier to view and more intuitive to set the y axis from 40-70 instead of 0-60 so the differences are easier to see. Also, the colors seem silly and do not add anything of value to the graph.
+
+
+**Question 4**
+
+Relative scaling is superior to absolute scaling when there are small numeric differences in the columns that are important. For example, when measuring the differences in race times for a sprint, using absolute scaling would make it difficult to tell which runners stand out from the others (whether for being slow or fast). But using relative scaling would make it easier to see gaps in performance
+
+
+**Question 5**
+
+An SVG is vector based. This means the quality does not change when you zoom in on an image. SVGs also have the advantage of being editable via programs
+The code below would save a plot titled image as an svg titled "test"
+ggsave(file="test.svg", plot=image, width=10, height=8)
+
+PNGs are pixel based. This means the image is saved as a collection of pixels, and the quality goes down when zooming in. PNGs are not editable
+The code below would save a plot as a png of x and y titled "test"
+jpeg("test.jpg")
+plot(x,y)
+dev.off()
+
+
+**Question 6**
+
+Through some research I learned colorblind people struggled with some of the following color combinations
+Green & Red
+Green & Brown
+Green & Blue
+Blue & Grey
+Blue & Purple
+It is important to remember these when creating graphs with important colors to ensure all viewers can understand
+
+
+**Question 7**
+
+Using 3D graphics is one way to add another dimension without using color, although it can be tricky to visualize. Also, if you have two quantitative variables and one categorical variable you can create a graph for each level in the categorical variable and combine them into one graph

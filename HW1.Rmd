@@ -1,0 +1,130 @@
+---
+title: "Homework1"
+author: "Bailey Vande Griend"
+date: "3/23/2020"
+output: pdf_document
+---
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+```
+**Question 1**
+
+```{r}
+knitr::opts_chunk$set(eval = FALSE)
+mydat <- iris
+mydat$id <- 1:nrow(mydat)
+sumRows <- function(x,i){
+  numColumns <- x[1:4]
+  sum(numColumns[i,])
+}
+sumRows(mydat, 45)
+sumRows(mydat, 130)
+```
+
+**Question 2**
+
+```{r}
+rowSums <- vector(length = 150L)
+numColumns <- mydat[1:4]
+for (i in 1:150){
+  rowSums[i] = sum(numColumns[i,])
+}
+```
+
+**Question 3**
+
+```{r}
+sumRows2 <- function(x){
+  numColumns <- x[1:4]
+  sum(numColumns)
+}
+rowSums2 <- apply(mydat[1:4],1,sumRows2)
+
+```
+
+**Question 4**
+
+```{r}
+mydatTrans <- as.data.frame(t(as.matrix(mydat[1:4])))
+rowSums3 <- sapply(mydatTrans, sum)
+```
+
+**Question 5**
+
+```{r}
+library(tidyr)
+longData <- gather(mydat, key = "Flower_Attributes", value = "Values", 
+                   Sepal.Length, Sepal.Width, Petal.Length, Petal.Width)
+```
+
+**Question 6**
+
+```{r}
+aggregateNumeric <- aggregate(Values~Flower_Attributes,longData, mean)
+aggregateNumeric["Average by Attribute"] <- aggregateNumeric["Values"]
+aggregateNumeric <- aggregateNumeric[-2]
+
+```
+
+**Question 7**
+
+```{r}
+longData <- merge(longData, aggregateNumeric, by = "Flower_Attributes")
+
+```
+
+**Question 8**
+
+```{r}
+aggregateNumeric2 <- aggregate(Values~Species+Flower_Attributes,longData,mean)
+aggregateNumeric2["Average by Species"] <- aggregateNumeric2["Values"]
+aggregateNumeric2 <- aggregateNumeric2[-3]
+longData <- merge(longData, aggregateNumeric2, by = c("Flower_Attributes","Species"))
+
+```
+
+**Question 9**
+
+```{r}
+longData <- spread(longData, Flower_Attributes, Values)
+
+```
+
+**Question 10**
+
+```{r}
+setwd("/Users/baile/OneDrive/Stat/IowaPov")
+IA1997 <- data.frame(read.fwf("Iowa1997.txt", widths = 
+                      c(3,4,9,9,9,5,5,5,9,9,9,5,5,5,9,9,9,5,5,5,7,7,7,8,8,8,5,5,5,46,3)))
+IA2018 <- data.frame(read.fwf("Iowa2018.txt", widths =
+                      c(3,4,9,9,9,5,5,5,9,9,9,5,5,5,9,9,9,5,5,5,7,7,7,8,8,8,5,5,5,46,3)))
+IA1997["Year"] <- 1997
+IA2018["Year"] <- 2018
+
+library(dplyr)
+IA1997 <- IA1997 %>%
+  rename(StateCode = V1, CountyCode = V2, PovertyEstimate = V3,
+         CILower90PovertyEst = V4, CIUpper90PovertyEst = V5,
+         PovertyPercent = V6, CountyName = V30)
+for (i in 1:100){
+  IA1997["MarginOfError"] <- abs(IA1997$CIUpper90PovertyEst-IA1997$PovertyEst)
+}
+
+IA2018 <- IA2018 %>%
+  rename(StateCode = V1, CountyCode = V2, PovertyEstimate = V3,
+         CILower90PovertyEst = V4, CIUpper90PovertyEst = V5,
+         PovertyPercent = V6, CountyName = V30)
+for (i in 1:100){
+  IA2018["MarginOfError"] <- abs(IA2018$CIUpper90PovertyEst-IA2018$PovertyEst)
+}
+IA1997Trimmed = subset(IA1997, select = c("CountyName", "Year",
+                                "PovertyEstimate", "MarginOfError", "PovertyPercent"))
+IA2018Trimmed = subset(IA2018, select = c("CountyName", "Year",
+                                 "PovertyEstimate", "MarginOfError", "PovertyPercent"))
+
+CleanData <- rbind(IA1997Trimmed, IA2018Trimmed)
+
+write.csv(CleanData, file = "CleanSAIPEData.csv")
+
+```
+

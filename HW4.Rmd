@@ -1,0 +1,95 @@
+---
+title: "HW4"
+author: "Bailey Vande Griend"
+date: "4/2/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(results = TRUE)
+```
+**Question 1**
+
+The boxplots show me that European and Oceanic countries have higher gdp on average, while Asia has the highest peak gdp. Boxplots in general show where the median of the data is as well as giving a good visualization for how much variation there is in the data
+
+
+**Question 2**
+
+With fewer groups, bar graphs are easier to visualize than dot plots because it is easier to tell where they are marked. With dot plots, it is tougher to tell at a quick glance what the values are for the categories.
+
+
+**Question 3**
+
+Stripplots are different than boxplots in that they show each individual point on a line, rather than grouping by quartiles. This can be useful with smaller datasets when quartiles aren't as meaningful
+
+
+**Question 4**
+
+Using scatterplots usually assumes some sense of linear association between the variables, meaning that the grapher assumes that as one variables increases, the other will either increase or decrease as well. This is to find how the variables are related, otherwise scatterplots aren't very useful.
+
+
+**Question 5**
+
+It is hard to find any patterns in the data, so I would say that the seconds scatterplot shows no apparent relationship between population and gdp, meaning that the two are not strongly related.
+
+
+**Question 6**
+
+GDP per capita seems to be highest with a high life expectancy. Population does not appear to have strong relationship with life expectancy or GDP per capita.
+
+
+**Question 7**
+```{r}
+library(ggplot2)
+library(gapminder)
+ggplot(gapminder) + geom_histogram(aes(x = gdpPercap))
+```
+
+**Question 8**
+```{r}
+data(gapminder)
+boxplot(gapminder$gdpPercap ~ gapminder$continent, gapminder,  xlab = "Continent",
+   ylab = "GDP per Capita")
+```
+
+```{r}
+gap2 <- aggregate(gdpPercap ~ continent, gapminder, mean)
+names(gap2)[2] <- "gdpPercap_avg"
+barplot(gap2$gdpPercap_avg, xlab = "Continent", ylab = "GDP per Capita", names.arg = gap2$continent)
+```
+
+```{r}
+gap90 <- gapminder[gapminder$year == 2007,]
+dotchart(gap90$gdpPercap, gap90$country, xlab = "GDP Per Capita", ylab = "Country", cex = .5)
+```
+
+```{r}
+gap90 <- gap90[order(gap90$gdpPercap),]
+dotchart(gap90$gdpPercap, gap90$country, xlab = "GDP Per Capita", ylab = "Country", cex = .5)
+```
+
+```{r}
+stripchart(gap90$gdpPercap,ylab = "All", xlab = "GDP Per Capita" )
+```
+
+```{r}
+plot(gapminder$lifeExp, gapminder$gdpPercap, xlab = "Life Expectancy", ylab = "GDP Per Capita")
+```
+
+```{r}
+plot(gapminder$pop, gapminder$gdpPercap, xlab = "Population", ylab = "GDP Per Capita")
+```
+
+**Question 9**
+```{r}
+USA <- gapminder[gapminder$country == "United States",]
+plot(USA$year,USA$lifeExp, xlab = "Year", ylab = "Life Expectancy", main  = "United States")
+```
+
+This graph shows how life expectancy has changed in the United States throughout the years. More specifically, it shows that life expectancy has increased steadily as the years have gone by.
+
+```{r}
+ggplot(gapminder) + geom_boxplot(aes(x = continent, y = lifeExp))
+```
+
+This box plot shows each continent's spread of life expectancy in their countries through the years. This shows that Africa has had a much lower median of life expectancy than most other continents, while Oceania and Europe have had higher medians of life expectancy. This boxplot also shows how Asia has had a lot of variation in their life expectancy

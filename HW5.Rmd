@@ -1,0 +1,67 @@
+---
+title: "HW5"
+author: "Bailey Vande Griend"
+date: "4/8/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(results = TRUE)
+```
+**Question 1**
+
+```{r}
+library(ggplot2)
+ccfreq <- data.frame(xtabs(~ color + cut, diamonds))
+library(lattice)
+barchart(Freq ~ color | cut, ccfreq, as.table = TRUE)
+```
+
+The first graph (the one with the muddled names) shows the frequency of cut by color, while this graph shows the frequency of color by cut. The muddled graph shows that most colors tend to have the same distribution of cuts, and this graph shows that most cuts have the same distrubition of colors, with some small differences. For example, in this graph we can see that "fair" and "good" have aout even amounts of each color, while the others seem to have more in F, G, and H, and less of I and J.
+
+
+**Question 2**
+
+```{r}
+library("GGally")
+myDat <- iris[, c(2, 1, 3, 4, 5)]
+ggparcoord(myDat, columns = 1:4, groupColumn = 5)
+```
+
+Using this ordering of columns, it is clear to see stark differences in the Setosa species. Setosa has signfiicantly higher Sepal Width, but lower in the other variables. Virginica also seeems to be higher than Versicolor in all categories, but they do follow the same trend line.
+
+
+**Question 3**
+
+```{r}
+library(gapminder)
+gap <- gapminder
+mosaicplot(~ year + continent, data = gapminder)
+```
+
+This graph may seem siilly, but it does show a few things. For one, it shows that every year had the same distribution of continents, meaning that there was no year where more countries or less countries were included. This graph also shows how many countries were included in the testing per continent. We can clearly see that Oceania had significantly less countries included in the testing, While Africa had the most. 
+
+**Question 4**
+
+Polar diagrams and pie charts look similar, but accomplish different things. Pie charts simply show how the proportions of the variables in the data, while polar diagrams are more similar to bar graphs where in they show the magnitude of each data. Personally, I believe pie charts are much easier for readers to visualize and understand, while polar diagrams seem silly when there are better replacements (bar graphs).
+
+
+**Question 5**
+
+Besides stacked bar charts, grouped bar charts are another way to represent two categorical data using a numeric. In grouped bar charts, bars are grouped by position for levels of one categorical variable, with color indicating the secondary category level within each group.
+
+
+**Question 6**
+
+```{r}
+gdp <- aggregate(gdpPercap ~ continent, gapminder, mean)
+pop <- aggregate(pop ~ continent, gapminder, mean)
+lifeExp <- aggregate(lifeExp ~ continent, gapminder, mean)
+newDat <- cbind(gdp, pop[2], lifeExp[2])
+row.names(newDat) <- newDat$continent
+newDat <- newDat[,2:4]
+newMatrix <- data.matrix(newDat)
+heatmap(newMatrix, Rowv=NA, Colv=NA, col = heat.colors(256), scale="column", margins=c(10,5))
+```
+
+This heatmap compares averages of population, life expectancy, and GDP per capita between the different continents. Lighter colors represent more in the respective variable, while darker colors (closer to red) represent less.

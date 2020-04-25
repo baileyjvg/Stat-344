@@ -1,0 +1,187 @@
+---
+title: "HW2"
+author: "Bailey Vande Griend"
+date: "3/25/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+```
+**Question 1**
+
+```{r}
+setwd("/Users/baile/OneDrive/Stat")
+messyData <- read.csv("MessyData", header = TRUE, stringsAsFactors = FALSE)
+messyDataOriginal <- data.frame(read.csv("MessyData"))
+```
+Some of the columns are hard to understand. It is hard to tell what Q1, Q2, Q3
+are describing. Also, weight does not have a unit of measurement. There are plenty 
+of missing data points as well. There also appear to be some mistakes in the names,
+as one of them seems to be entered twice, just incorrectly one of the times and
+another is in all caps. The first half also seems to be in alphabetical order, but 
+then afterwards is not. In Q3, some data points are simplified to "y" and "n". while
+others are written out to be "yes" and "no."
+
+**Question 2**
+
+"Wedel" appears in both the First and Last category, and the last name Brown appears
+in Last twice
+
+**Question 3**
+
+```{r}
+extraComments <- read.csv("Extra.csv", header = TRUE, stringsAsFactors = FALSE)
+sampVect <- match(extraComments$Last, messyData$Last)
+```
+These last names do not exist in the original data so we delete them
+```{r}
+sampVect <- sampVect[-3]
+sampVect <- sampVect[-3]
+sampVect <- sampVect[-5]
+extraComments <- extraComments[-3,]
+extraComments <- extraComments[-3,]
+extraComments <- extraComments[-5,]
+for (i in 1:length(extraComments$comments))
+messyData[sampVect[i],8] <- extraComments$comments[i]
+```
+
+**Question 4**
+
+```{r}
+messyData$Q3 <- sub("y", "Y", messyData$Q3)
+messyData$Q3 <- sub("Yes", "Y", messyData$Q3)
+messyData$Q3 <- sub("n", "N", messyData$Q3)
+```
+
+**Question 5**
+
+```{r}
+messyData$Last <- gsub("-.*","",messyData$Last)
+```
+
+**Question 6**
+
+```{r}
+afterDecimal <- gsub(".*\\.","", as.character.numeric_version(messyData$weight))
+messyData$weight <- gsub("\\..*", "", messyData$weight)
+messyData["WeightDec"] <- afterDecimal
+```
+
+**Question 7**
+
+Delete pointless column and the name that was entered incorrectly
+```{r}
+messyData <- messyData[-4,]
+messyData <- messyData[-6]
+```
+Fix capitalization of one name
+```{r}
+messyData$First <-  sub("CLARA", "Clara", messyData$First)
+messyData$Last <-  sub("POMPER", "Pomper", messyData$Last)
+```
+Change the titles of the columns so they are all capitalized
+```{r}
+colnames(messyData)[3] <- "Age"
+colnames(messyData)[4] <- "Weight(kg)"
+colnames(messyData)[7] <- "Comments"
+```
+
+**Question 8**
+
+```{r}
+setwd("/Users/baile/OneDrive/Stat/IowaPovLayouts")
+layouts <- list()
+layoutDirectory <- dir(pattern = "\\d+-estimate-layout.txt")
+for (i in 1:length(layoutDirectory)){
+  layouts[[i]] <- readLines(layoutDirectory[i])
+}
+
+setwd("/Users/baile/OneDrive/Stat/IowaPov")
+datasets <- list()
+dataDirectory <- dir(pattern = "Iowa\\d{4}.txt")
+for (i in 1:length(dataDirectory)){
+  datasets[[i]] <- readLines(dataDirectory[i])
+}
+countyStartIndex <- list()
+countyEndIndex <- list()
+county <- list()
+countyWidths <- list()
+
+for(i in 1:length(layouts)){
+  county[i] <- grep("[0-9]", layouts[[i]][grep("State or county name", layouts[[i]])], value = TRUE)
+  county[i] <- gsub("[^0-9-]","",county[i])
+  
+  countyStartIndex[i] <- as.numeric(gsub("-\\d+","", county[i]))
+  countyEndIndex[i] <- as.numeric(gsub("\\d+-","", county[i]))
+}
+countyStartIndex <- unlist(countyStartIndex)
+countyEndIndex <- unlist(countyEndIndex)
+for (i in 1:length(countyStartIndex)){
+  countyWidths[i] <- countyEndIndex[i]-countyStartIndex[i]
+}
+
+povertyStartIndex <- list()
+povertyEndIndex <- list()
+poverty <- list()
+povertyWidths <- list()
+
+for (i in 1:length(layouts)){
+  poverty[i] <- grep("[0-9]", layouts[[i]][grep("Estimated percent of people of all ages in poverty", layouts[[i]])], value = TRUE)
+  poverty[i] <- gsub("[^0-9-]", "", poverty[i])
+  
+  povertyStartIndex[i] <- as.numeric(gsub("-\\d+","",poverty[i]))
+  povertyEndIndex[i] <- as.numeric(gsub("\\d+-", "", poverty[i]))
+}
+
+povertyStartIndex <- unlist(povertyStartIndex)
+povertyEndIndex <- unlist(povertyEndIndex)
+for (i in 1:length(povertyStartIndex)){
+  povertyWidths[i] <- povertyEndIndex[i]-povertyStartIndex[i]
+}
+
+LowerStartIndex <- list()
+LowerEndIndex <- list()
+Lower <- list()
+LowerWidths <- list()
+
+for (i in 1:length(layouts)){
+  LowerMatches <- grep("90% confidence interval lower bound of", layouts[[i]])
+  Lower[i] <- grep("[0-9]", layouts[[i]][LowerMatches[2]], value = TRUE)
+  Lower[i] <- gsub("[^0-9-]", "", Lower[i])
+  Lower[i] <- gsub("90", "", Lower[i])
+  
+  LowerStartIndex[i] <- as.numeric(gsub("-\\d+", "", Lower[i]))
+  LowerEndIndex[i] <- as.numeric(gsub("\\d+-", "", Lower[i]))
+}
+
+LowerStartIndex <- unlist(LowerStartIndex)
+LowerEndIndex <- unlist(LowerEndIndex)
+for (i in 1:length(LowerStartIndex)){
+  LowerWidths[i] <- LowerEndIndex[i]-LowerStartIndex[i]
+}
+
+widths <- list()
+for (i in 1:length(layouts)){
+  widths[[i]] <- c(as.numeric(povertyStartIndex[i])-1, as.numeric(povertyWidths[i])+2,
+    as.numeric(LowerWidths[i])+2, as.numeric(countyStartIndex[i])-(as.numeric(LowerEndIndex[i])+2), 
+    as.numeric(countyWidths[i])+2,3)
+}
+for (i in 1:length(dataDirectory)){
+  datasets[[i]] <- read.fwf(dataDirectory[i], widths[[i]])
+  datasets[[i]] <- datasets[[i]][c(2,3,5)]
+  colnames(datasets[[i]])[1] <- "PovertyPercent"
+  colnames(datasets[[i]])[3] <- "CountyOrStateName"
+  for (j in 1:length(datasets[[i]]$PovertyPercent)){
+  datasets[[i]]["PercentMOE"] <- datasets[[i]]$PovertyPercent-datasets[[i]]$V3
+  }
+  datasets[[i]]["Year"] <- i+1996
+  datasets[[i]] <- datasets[[i]][c(1,3,4,5)]
+}
+```
+
+This is the combined data frames, its meant to be read as a collection of 
+separate data frames rather than one large data frame
+```{r}
+DFdatasets <- data.frame(datasets)
+```
