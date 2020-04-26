@@ -10,6 +10,8 @@ knitr::opts_chunk$set(eval = FALSE)
 ```
 **Question 1**
 
+Bailey Vande Griend
+
 ```{r}
 setwd("/Users/baile/OneDrive/Stat")
 messyData <- read.csv("MessyData", header = TRUE, stringsAsFactors = FALSE)
