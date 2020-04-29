@@ -1,0 +1,152 @@
+---
+title: "Final Project"
+author: "Bailey Vande Griend"
+date: "4/28/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(results = TRUE)
+```
+<font size="6"> How has Baseball Changed Recently? </font>
+
+It's no secret that baseball's popularity has been in question recently. Some say its a dying sport, while others insist it is only stagnant and still has room to grow. Regardless, many efforts have been made to make baseball more exciting to watch. One such change involved changing the league standard for the baseball. This was done in 2017, and more recently in 2019. The question is, has this actually affected the sport? To answer this question, we will be looking at hitting stats from the last 4 years to see if there are any differences.
+
+```{r}
+##Creating and cleaning our data
+setwd("/Users/baile/OneDrive/Git/Stat-344")
+library(readxl)
+Bball2016 <- read_excel("2016Stats.xlsx")
+Bball2016$Year <- 2016
+Bball2017 <- read_excel("2017Stats.xlsx")
+Bball2017$Year <- 2017
+Bball2018 <- read_excel("2018Stats.xlsx")
+Bball2018$Year <- 2018
+Bball2019 <- read_excel("2019Stats.xlsx")
+Bball2019$Year <- 2019
+Bball2019 <- Bball2019[-c(32,33),]
+baseball <- rbind(Bball2016, Bball2017, Bball2018, Bball2019)
+baseball <- baseball[-c(2:3,15,24:29)]
+for (i in 2:20){
+  baseball[[i]] <- as.numeric(unlist(baseball[[i]]))
+}
+```
+<font size="4"> Analyzing Home Runs </font>
+
+Since the home run is the most exciting play in baseball (after all, chicks do dig the long ball), we will begin by analyzing how home runs have been affected by the change in the baseball. First we will look at a simple barplot to see the differences in the years.
+```{r}
+library(ggplot2)
+HRs <- aggregate(HR ~ Year, baseball, sum)
+ggplot(HRs,aes(x = Year, y = HR)) + geom_bar(stat = "identity") + coord_flip()
+```
+
+Lets look at it differently, to see progression over time easier
+```{r}
+plot(HR ~ Year, data = HRs, type = "b")
+```
+
+This is only the data for the total home runs per year, what if we include each team's amount of homeruns per year?
+```{r}
+baseball[[21]] <- as.factor(baseball[[21]])
+ggplot(baseball, aes(x=Year, y=HR)) + 
+  geom_dotplot(binaxis='y', stackdir='center')
+```
+
+It might be easier to see differences using a boxplot
+```{r}
+boxplot(baseball$HR ~baseball$Year, ylab = "Home Runs", xlab = "Year")
+```
+
+To see each team specifically
+```{r}
+ggplot(data=baseball, aes(x=Tm, y=HR, color=Year)) +
+  geom_point(position=position_dodge(width=.1)) + theme(axis.text.x = element_text(angle = 60, hjust = 1))
+```
+
+```{r}
+HR2016 <- as.numeric(baseball$HR[baseball$Year == 2016])
+HR2017 <- as.numeric(baseball$HR[baseball$Year == 2017])
+HR2018 <- as.numeric(baseball$HR[baseball$Year == 2018])
+HR2019 <- as.numeric(baseball$HR[baseball$Year == 2019])
+Teams <- baseball$Tm[baseball$Year == 2016]
+HRFrame <- cbind(HR2016, HR2017, HR2018, HR2019, Teams)
+library(GGally)
+ggparcoord(HRFrame, columns = 1:4, groupColumn = 5)
+```
+
+Looking at these graphs, we can see that almost every team hit the most homeruns in 2019. To see this more clearly, lets examine a bar chart for every team and their home runs per year
+```{r}
+library(lattice)
+barchart(HR ~ Year | Tm, baseball) 
+```
+
+Crazily enough, looking at this data nearly every team hit their most home runs in the last 4 years in 2019. Even crazier, every single team hit more home runs in 2019 than they did in 2018.
+
+
+It seems pretty clear that home runs increased in 2019, but what else changed? Let's look at a heatmap of all teams and their hitting statistics to see
+```{r}
+Runs <- aggregate(R ~ Year, baseball, sum)
+Hits <- aggregate(H ~ Year, baseball, sum)
+Doubles <- aggregate(baseball$`2B` ~ Year, baseball, sum)
+Triples <- aggregate(baseball$`3B` ~ Year, baseball, sum)
+RBI <- aggregate(RBI ~ Year, baseball, sum)
+SB <- aggregate(SB ~ Year, baseball, sum)
+Walks <- aggregate(BB ~ Year, baseball, sum)
+SO <- aggregate(SO ~ Year, baseball, sum)
+Average <- aggregate(BA ~ Year, baseball, sum)
+OBP <- aggregate(OBP ~ Year, baseball, sum)
+Slg <- aggregate(SLG ~ Year, baseball, sum)
+Bases <- aggregate(TB ~ Year, baseball, sum)
+baseballMatrix <- cbind(Runs[2], Hits[2], Doubles[2], Triples[2], RBI[2], SB[2], Walks[2], SO[2], Average[2], OBP[2], Slg[2], HRs[2], Bases)
+baseballMatrix$Year <- as.factor(baseballMatrix$Year)
+row.names(baseballMatrix) <- baseballMatrix$Year
+baseballMatrix <- baseballMatrix[-13]
+colnames(baseballMatrix)[3] <- "2B"
+colnames(baseballMatrix)[4] <- "3B"
+baseballMatrix <- as.matrix(baseballMatrix)
+heatmap(baseballMatrix, Rowv=NA, Colv=NA, col = heat.colors(256), scale="column", margins=c(5,10))
+```
+
+Many interesting things stand out here. As expected, 2019 is highest in total bases, slugging, RBIs, and runs.For many baseball fans, these are all good things that increase excitement. However, it is also highest in strikeouts, and it isn't the highest in batting average or on base percentage. Strikeouts are arguably the least exciting thing in baseball. Did changing the ball increase the amount of strikeouts as well as home runs? We are going to look closer to see if there is a connection between homeruns hit in a season and strikeouts to see.
+
+```{r}
+plot(baseball$HR ~ baseball$SO, xlab = "Strikeouts", ylab = "Home Runs")
+reg<-lm(HR ~ SO, data = baseball)
+abline(reg, col="black")
+```
+
+There isn't super strong correlation here, lets include year to see if anything stands out
+```{r}
+plot(baseball$HR ~ baseball$SO, xlab = "Strikeouts", ylab = "Home Runs",  col=as.integer(baseball$Year))
+abline(reg, col="black")
+legend(980, 300, legend = c("2016", "2017", "2018","2019"), pch=1, col=c("Black", "Green", "Red", "Blue"))
+```
+
+Looking at the graph now with year included, we see that most of the extreme values happened in 2019. 2019 seems to be the year with significantly more strikeouts, as well as more Home Runs. Lets look closer into strikeouts per year.
+
+```{r}
+ggplot(SO,aes(x = Year, y = SO)) + geom_bar(stat = "identity") + coord_cartesian(ylim = c(37500, 50000))
+```
+
+```{r}
+SO$Year <- c(2016,2017,2018,2019)
+ggplot(SO,aes(x = Year, y = SO)) + geom_point() + geom_line()
+```
+
+These graphs show a clear increase in strikeouts in 2019, however it also appears that the increase may be part of a natural increase in strikeouts over the past 4 years, as it follows the trend line. Lets look at each teams strikeout totals over the last four years to see more
+```{r}
+ggplot(baseball, aes(x=Year, y=SO)) + 
+  geom_dotplot(binaxis='y', stackdir='center')
+```
+
+```{r}
+ggplot(data=baseball, aes(x=Tm, y=SO, color=Year)) +
+  geom_point(position=position_dodge(width=.1)) + theme(axis.text.x = element_text(angle = 60, hjust = 1))
+```
+```{r}
+barchart(SO ~ Year | Tm, baseball) 
+```
+
+While not as clear cut as home runs were, it does appear that many teams struck out more in 2019 than they did in any other year. However, these graphs also show that strikeouts seem to be increasing year by year, and it is possible that 2019 is only continuing the trend. 
+
+The question still remains, how did changing the baseball affect the sport? After analyzing some data, it is clear that teams were able to hit more home runs with this new ball. Many would argue that this is a good thing for the sport, as home runs are exciting to watch. However, it seems possible that changing the ball also increased the amount of strikeouts. If changing the ball increased home runs and strikeouts, I'm not sure that is a positive tradeoff for the sport. It leads to a binary approach to hitting, every at bat is either a home run or a strikeout, which greatly decreases the depth of the sport. However, it is very possible that changing the ball did not actually affect strikeouts, and strikeouts are simply increasing each year as players get better. Regardless, changing the ball clearly changed the way the game is played, and only time will tell if it was for the better.
