@@ -8,7 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(results = TRUE)
 ```
-<font size="6"> How has Baseball Changed Recently? </font>
+<font size="5"> How has Baseball Changed Recently? </font>
 
 It's no secret that baseball's popularity has been in question recently. Some say its a dying sport, while others insist it is only stagnant and still has room to grow. Regardless, many efforts have been made to make baseball more exciting to watch. One such change involved changing the league standard for the baseball. This was done in 2017, and more recently in 2019. The question is, has this actually affected the sport? To answer this question, we will be looking at hitting stats from the last 4 years to see if there are any differences.
 
@@ -30,6 +30,7 @@ baseball <- baseball[-c(2:3,15,24:29)]
 for (i in 2:20){
   baseball[[i]] <- as.numeric(unlist(baseball[[i]]))
 }
+baseball$shYear <- as.factor(c(rep(16,31),rep(17,31),rep(18,31),rep(19,31)))
 ```
 <font size="4"> Analyzing Home Runs </font>
 
@@ -77,7 +78,8 @@ ggparcoord(HRFrame, columns = 1:4, groupColumn = 5)
 Looking at these graphs, we can see that almost every team hit the most homeruns in 2019. To see this more clearly, lets examine a bar chart for every team and their home runs per year
 ```{r}
 library(lattice)
-barchart(HR ~ Year | Tm, baseball) 
+yrvec = c(2016,2017,2018,2019)
+barchart(HR ~ shYear | Tm, baseball)
 ```
 
 Crazily enough, looking at this data nearly every team hit their most home runs in the last 4 years in 2019. Even crazier, every single team hit more home runs in 2019 than they did in 2018.
@@ -144,9 +146,11 @@ ggplot(data=baseball, aes(x=Tm, y=SO, color=Year)) +
   geom_point(position=position_dodge(width=.1)) + theme(axis.text.x = element_text(angle = 60, hjust = 1))
 ```
 ```{r}
-barchart(SO ~ Year | Tm, baseball) 
+barchart(SO ~ shYear | Tm, baseball) 
 ```
 
 While not as clear cut as home runs were, it does appear that many teams struck out more in 2019 than they did in any other year. However, these graphs also show that strikeouts seem to be increasing year by year, and it is possible that 2019 is only continuing the trend. 
+
+<font size="5"> Conclusion </font>
 
 The question still remains, how did changing the baseball affect the sport? After analyzing some data, it is clear that teams were able to hit more home runs with this new ball. Many would argue that this is a good thing for the sport, as home runs are exciting to watch. However, it seems possible that changing the ball also increased the amount of strikeouts. If changing the ball increased home runs and strikeouts, I'm not sure that is a positive tradeoff for the sport. It leads to a binary approach to hitting, every at bat is either a home run or a strikeout, which greatly decreases the depth of the sport. However, it is very possible that changing the ball did not actually affect strikeouts, and strikeouts are simply increasing each year as players get better. Regardless, changing the ball clearly changed the way the game is played, and only time will tell if it was for the better.
