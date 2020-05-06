@@ -86,8 +86,12 @@ Crazily enough, looking at this data nearly every team hit their most home runs 
 
 ```{r}
 baseball[[21]] <- as.numeric(baseball[[21]])
-summary(lm(baseball$HR ~ baseball$BB + baseball$Year, data = baseball))
-anova(lm(baseball$HR ~ baseball$BB + baseball$Year, data = baseball))
+HRModel <- lm(baseball$HR ~ baseball$BB + baseball$Year, data = baseball)
+plot(baseball$HR ~ baseball$BB, xlab = "Walks", ylab = "Home Runs",  col=as.integer(baseball$Year))
+legend(375, 310, legend = c("2016", "2017", "2018","2019"), pch=1, col=c("Black", "Green", "Red", "Blue"))
+plot(HRModel)
+summary(HRModel)
+anova(HRModel)
 baseball[[21]] <- as.factor(baseball[[21]])
 HRchart <-data.frame(
   group = c("Walks","Year","Error"),
@@ -97,6 +101,8 @@ HRchart$VariationExplained <- HRchart$value
 ggplot(HRchart, aes(x="", y=VariationExplained, fill=group))+
 geom_bar(width = 1, stat = "identity") + coord_polar("y", start=0)
 ```
+
+First we need to check our assumptions to see if our linear model is appropriate. Since the relationship appears linear, The variance of the residuals seems even, the QQ normal plot seems linear, and the observations are independent, the assumptions are met and we can continue with our linear model.
 
 The linear model using year and walks to predict home runs is 
 
@@ -120,7 +126,7 @@ Slg <- aggregate(SLG ~ Year, baseball, sum)
 Bases <- aggregate(TB ~ Year, baseball, sum)
 baseballMatrix <- cbind(Runs[2], Hits[2], Doubles[2], Triples[2], RBI[2], SB[2], Walks[2], SO[2], Average[2], OBP[2], Slg[2], HRs[2], Bases)
 baseballMatrix$Year <- as.factor(baseballMatrix$Year)
-row.names(baseballMatrix) <- baseballMatrix$Year
+row.names(baseballMatrix) <- c(2016,2017,2018,2019)
 baseballMatrix <- baseballMatrix[-13]
 colnames(baseballMatrix)[3] <- "2B"
 colnames(baseballMatrix)[4] <- "3B"
@@ -171,8 +177,10 @@ barchart(SO ~ shYear | Tm, baseball)
 While not as clear cut as home runs were, it does appear that many teams struck out more in 2019 than they did in any other year. However, these graphs also show that strikeouts seem to be increasing year by year, and it is possible that 2019 is only continuing the trend. Lets check this by looking at a linear model of strikeouts explained by year and home runs
 ```{r}
 baseball[[21]] <- as.numeric(baseball[[21]])
-summary(lm(baseball$SO ~ baseball$HR + baseball$Year, data = baseball))
-anova(lm(baseball$SO ~ baseball$HR + baseball$Year, data = baseball))
+SOModel <- lm(baseball$SO ~ baseball$HR + baseball$Year, data = baseball)
+plot(SOModel)
+summary(SOModel)
+anova(SOModel)
 baseball[[21]] <- as.factor(baseball[[21]])
 SOchart <-data.frame(
   group = c("Home Runs","Year","Error"),
@@ -181,12 +189,15 @@ SOchart <-data.frame(
 SOchart$VariationExplained <- SOchart$value
 ggplot(SOchart, aes(x="", y=VariationExplained, fill=group))+
 geom_bar(width = 1, stat = "identity") + coord_polar("y", start=0)
+
 ```
+
+First we need to check our assumptions to see if our linear model is appropriate. Since the relationship appears linear, The variance of the residuals seems even, the QQ normal plot seems linear, and the observations are independent, the assumptions are met and we can continue with our linear model
 
 The linear model using year and home runs to predict strikeouts is 
 
 Strikeouts = 1190.33 + 0.3626(HR) + 38.4882(year).
-The total amount of variation explained in home runs is about 16.6%, with Home runs explaining 5% and year explaining about 12%. The biggest takeaway here seems to be that home runs do not seem to have much of an effect on the amount of strikeouts, meaning that changing the ball did increase home runs but didn't affect strikeouts.
+The total amount of variation explained in home runs is about 16.6%, with Home runs explaining 5% and year explaining about 12%. The biggest takeaway here seems to be that home runs do not seem to have much of an effect on the amount of strikeouts, meaning that changing the ball did increase home runs but probably didn't affect strikeouts.
 
 
 <font size="5"> Conclusion </font>
